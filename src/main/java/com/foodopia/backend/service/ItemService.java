@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,38 +29,35 @@ public class ItemService {
     }
 
     public Item addItemWithImage(Item item, MultipartFile imageFile) {
-        String uuid = UUID.randomUUID().toString();
         try {
-            logger.info("uuid={} Adding item with image: name={}", uuid, item.getName());
+            logger.info("Adding item with image: name={}", item.getName());
             String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
             item.setImageUrl("data:" + imageFile.getContentType() + ";base64," + base64Image);
             Item saved = itemRepository.save(item);
-            logger.info("uuid={} Item added successfully: id={}", uuid, saved.getId());
+            logger.info("Item added successfully: id={}", saved.getId());
             return saved;
         } catch (IOException e) {
-            logger.error("uuid={} errorCode=IMAGE_PROCESSING_ERROR errormessage=Failed to process image for item: name={}",
-                    uuid, item.getName());
+            logger.error("errorCode=IMAGE_PROCESSING_ERROR errormessage=Failed to process image for item: name={}",
+                    item.getName());
             if (logger.isDebugEnabled()) {
-                logger.debug("uuid={} stacktrace", uuid, e);
+                logger.debug("stacktrace", e);
             }
             throw new RuntimeException("Bild konnte nicht verarbeitet werden", e);
         }
     }
 
     public Item addItem(Item item) {
-        String uuid = UUID.randomUUID().toString();
-        logger.info("uuid={} Adding item without image: name={}", uuid, item.getName());
+        logger.info("Adding item without image: name={}", item.getName());
         Item saved = itemRepository.save(item);
-        logger.info("uuid={} Item added successfully: id={}", uuid, saved.getId());
+        logger.info("Item added successfully: id={}", saved.getId());
         return saved;
     }
 
     public Item updateItemWithImage(String id, Item updatedItem, MultipartFile imageFile) {
-        String uuid = UUID.randomUUID().toString();
-        logger.info("uuid={} Updating item with image: id={}", uuid, id);
+        logger.info("Updating item with image: id={}", id);
 
         Item item = itemRepository.findById(id).orElseThrow(() -> {
-            logger.error("uuid={} errorCode=ITEM_NOT_FOUND errormessage=Item not found: id={}", uuid, id);
+            logger.error("errorCode=ITEM_NOT_FOUND errormessage=Item not found: id={}", id);
             return new RuntimeException("Item nicht gefunden");
         });
 
@@ -70,38 +66,36 @@ public class ItemService {
             updatedItem.setImageUrl("data:" + imageFile.getContentType() + ";base64," + base64Image);
             updatedItem.setId(id);
             Item saved = itemRepository.save(updatedItem);
-            logger.info("uuid={} Item updated successfully: id={}", uuid, id);
+            logger.info("Item updated successfully: id={}", id);
             return saved;
         } catch (IOException e) {
-            logger.error("uuid={} errorCode=IMAGE_PROCESSING_ERROR errormessage=Failed to process image for item update: id={}",
-                    uuid, id);
+            logger.error("errorCode=IMAGE_PROCESSING_ERROR errormessage=Failed to process image for item update: id={}",
+                    id);
             if (logger.isDebugEnabled()) {
-                logger.debug("uuid={} stacktrace", uuid, e);
+                logger.debug("stacktrace", e);
             }
             throw new RuntimeException("Bild konnte nicht verarbeitet werden", e);
         }
     }
 
     public Item updateItem(String id, Item updatedItem) {
-        String uuid = UUID.randomUUID().toString();
-        logger.info("uuid={} Updating item without image: id={}", uuid, id);
+        logger.info("Updating item without image: id={}", id);
 
         if (!itemRepository.existsById(id)) {
-            logger.error("uuid={} errorCode=ITEM_NOT_FOUND errormessage=Item not found: id={}", uuid, id);
+            logger.error("errorCode=ITEM_NOT_FOUND errormessage=Item not found: id={}", id);
             throw new RuntimeException("Item nicht gefunden");
         }
 
         updatedItem.setId(id);
         Item saved = itemRepository.save(updatedItem);
-        logger.info("uuid={} Item updated successfully: id={}", uuid, id);
+        logger.info("Item updated successfully: id={}", id);
         return saved;
     }
 
     public void deleteItem(String id) {
-        String uuid = UUID.randomUUID().toString();
-        logger.info("uuid={} Deleting item: id={}", uuid, id);
+        logger.info("Deleting item: id={}", id);
         itemRepository.deleteById(id);
-        logger.info("uuid={} Item deleted successfully: id={}", uuid, id);
+        logger.info("Item deleted successfully: id={}", id);
     }
 
     public List<Item> getFilteredItems(
