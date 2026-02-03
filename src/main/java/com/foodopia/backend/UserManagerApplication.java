@@ -17,6 +17,9 @@ public class UserManagerApplication {
     @Value("${spring.application.name}")
     private String appName;
 
+    @Value("${logging.include-stacktrace:false}")
+    private boolean includeStackTrace;
+
     public static void main(String[] args) {
         SpringApplication.run(UserManagerApplication.class, args);
     }
@@ -24,5 +27,18 @@ public class UserManagerApplication {
     @PostConstruct
     public void logStartup() {
         log.info("Application {} version {} started successfully", appName, version);
+        setupGlobalExceptionHandler();
+    }
+
+    private void setupGlobalExceptionHandler() {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            log.error("Uncaught exception in thread={} message={}",
+                    thread.getName(),
+                    throwable.getMessage());
+
+            if (includeStackTrace) {
+                log.error("stacktrace", throwable);
+            }
+        });
     }
 }

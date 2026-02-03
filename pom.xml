@@ -110,18 +110,7 @@
             <!-- alle .properties-Dateien nicht filtern -->
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <includes>
-                    <include>**/*.properties</include>
-                </includes>
-            </resource>
-            <!-- andere Ressourcen ggf. gefiltert lassen -->
-            <resource>
-                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-                <excludes>
-                    <exclude>**/*.properties</exclude>
-                </excludes>
             </resource>
         </resources>
 
