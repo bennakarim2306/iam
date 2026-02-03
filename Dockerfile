@@ -1,5 +1,7 @@
 # dockerfile
 FROM maven:3.9.5-eclipse-temurin-17 AS build
+ARG APP_VERSION
+LABEL app.version=$APP_VERSION
 WORKDIR /workspace
 COPY pom.xml .
 RUN mvn -B dependency:go-offline
