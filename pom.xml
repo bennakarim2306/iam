@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.foodopia</groupId>
 	<artifactId>backend</artifactId>
-	<version>0.0.3</version>
+	<version>0.3.1</version>
 	<name>userManager</name>
 	<description>Backend service for the Hop drive sharing project</description>
     <properties>
