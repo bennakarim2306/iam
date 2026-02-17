@@ -49,6 +49,13 @@ public class KeyConfig {
     }
 
     private String loadKeyContent(String keyPath) throws IOException {
+        // Handle base64 encoded format: base64:ENCODED_CONTENT
+        if (keyPath.startsWith("base64:")) {
+            String base64Content = keyPath.substring("base64:".length());
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Content);
+            return new String(decodedBytes, StandardCharsets.UTF_8);
+        }
+
         // Handle environment variable format: env:ENV_VAR_NAME
         if (keyPath.startsWith("env:")) {
             String envVarName = keyPath.substring("env:".length());
@@ -56,12 +63,11 @@ public class KeyConfig {
             if (content == null || content.isEmpty()) {
                 throw new IllegalStateException("Environment variable '" + envVarName + "' not found or empty");
             }
+            // Check if the env var contains base64 encoded content
+            if (content.startsWith("base64:")) {
+                return loadKeyContent(content);
+            }
             return content;
-        }
-
-        // Handle AWS Secrets Manager format: aws-secretsmanager://secret-name
-        if (keyPath.startsWith("aws-secretsmanager://")) {
-            return loadFromAwsSecretsManager(keyPath.substring("aws-secretsmanager://".length()));
         }
 
         // Handle classpath resources: classpath:path/to/file.pem
@@ -74,40 +80,43 @@ public class KeyConfig {
         return new String(Files.readAllBytes(Paths.get(keyPath)), StandardCharsets.UTF_8);
     }
 
-    private String loadFromAwsSecretsManager(String secretName) {
-        // TODO: Implement AWS Secrets Manager integration
-        throw new UnsupportedOperationException("AWS Secrets Manager integration not yet implemented. " +
-                "Use env:, classpath:, or file system paths.");
-    }
-
     private PrivateKey parsePrivateKey(String keyContent) throws Exception {
         try (StringReader reader = new StringReader(keyContent)) {
             PEMParser pemParser = new PEMParser(reader);
             Object obj = pemParser.readObject();
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
 
+            if (obj == null) {
+                throw new IOException("PEM parser returned null. Key content might be malformed or empty.");
+            }
+
             if (obj instanceof PEMKeyPair) {
-                // Handle RSA PRIVATE KEY format (PKCS1)
                 return converter.getPrivateKey(((PEMKeyPair) obj).getPrivateKeyInfo());
             } else if (obj instanceof PrivateKeyInfo) {
-                // Handle PRIVATE KEY format (PKCS8)
                 return converter.getPrivateKey((PrivateKeyInfo) obj);
             } else {
-                throw new IOException("Unsupported key format. Expected RSA PRIVATE KEY or PRIVATE KEY");
+                throw new IOException("Unsupported key format. Expected RSA PRIVATE KEY or PRIVATE KEY, got: " + obj.getClass().getName());
             }
+        } catch (Exception e) {
+            System.err.println("ERROR: Failed to parse private key");
+            throw e;
         }
     }
 
     private PublicKey parsePublicKey(String keyContent) throws Exception {
-        // Remove PEM headers and whitespace
-        String publicKeyPEM = keyContent
-                .replace("-----BEGIN PUBLIC KEY-----", "")
-                .replace("-----END PUBLIC KEY-----", "")
-                .replaceAll("\\s", "");
+        try {
+            String publicKeyPEM = keyContent
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s", "");
 
-        byte[] decodedKey = Base64.getDecoder().decode(publicKeyPEM);
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePublic(keySpec);
+            byte[] decodedKey = Base64.getDecoder().decode(publicKeyPEM);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePublic(keySpec);
+        } catch (Exception e) {
+            System.err.println("ERROR: Failed to parse public key");
+            throw e;
+        }
     }
 }
