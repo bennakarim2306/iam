@@ -3,6 +3,7 @@ package com.foodopia.backend.rest.v1;
 import com.foodopia.backend.exception.AuthorizationResponseException;
 import com.foodopia.backend.rest.v1.dto.AuthenticationRequest;
 import com.foodopia.backend.rest.v1.dto.AuthenticationResponse;
+import com.foodopia.backend.rest.v1.dto.RefreshTokenRequest;
 import com.foodopia.backend.security.auth.AuthenticationService;
 import com.foodopia.backend.security.auth.RegisterRequest;
 import jakarta.validation.Valid;
@@ -32,5 +33,12 @@ public class AuthenticationController {
             @RequestBody @Valid AuthenticationRequest request
     ) throws AuthorizationResponseException {
         return ResponseEntity.ok(authenticationService.authenticate(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refresh(
+            @RequestBody @Valid RefreshTokenRequest request
+    ) throws AuthorizationResponseException {
+        return ResponseEntity.ok(authenticationService.refreshToken(request.getRefreshToken()));
     }
 }

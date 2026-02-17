@@ -44,13 +44,13 @@ public class AuthenticationService {
             throw new UserAlreadyExistingException(message, ErrorCode.USER_ALREADY_REGISTERED);
         }
 
-
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .refreshToken(refreshToken)
                 .build();
-
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws AuthorizationResponseException, AuthenticationException {
@@ -58,8 +58,40 @@ public class AuthenticationService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public AuthenticationResponse refreshToken(String refreshToken) throws AuthorizationResponseException {
+        // Validate that this is actually a refresh token
+        if (!jwtService.isRefreshToken(refreshToken)) {
+            throw new AuthorizationResponseException("Invalid token type. Refresh token required.", ErrorCode.INVALID_TOKEN);
+        }
+        
+        String userEmail = jwtService.extractUserEmail(refreshToken);
+        
+        if (userEmail == null) {
+            throw new AuthorizationResponseException("Invalid refresh token", ErrorCode.INVALID_TOKEN);
+        }
+        
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UnregisteredUserException(
+                        "User not found with email: " + userEmail, 
+                        UNREGISTERED_USER
+                ));
+        
+        if (!jwtService.isTokenValid(refreshToken, user)) {
+            throw new AuthorizationResponseException("Refresh token is invalid or expired", ErrorCode.INVALID_TOKEN);
+        }
+        
+        var newJwtToken = jwtService.generateToken(user);
+        var newRefreshToken = jwtService.generateRefreshToken(user);
+        return AuthenticationResponse.builder()
+                .token(newJwtToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
 }
