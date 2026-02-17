@@ -5,6 +5,7 @@ import com.sun.security.auth.UserPrincipal;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,11 @@ import java.util.Objects;
 @Component
 public class UserHandshakeHandler extends DefaultHandshakeHandler {
     private final Logger LOG = LoggerFactory.getLogger(UserHandshakeHandler.class);
-    private final JwtService jwtService = new JwtService();
+    private final JwtService jwtService;
 
-    public UserHandshakeHandler() {
+    @Autowired
+    public UserHandshakeHandler(JwtService jwtService) {
+        this.jwtService = jwtService;
     }
 
     @Override
