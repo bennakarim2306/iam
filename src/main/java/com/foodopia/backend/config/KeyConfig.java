@@ -18,7 +18,6 @@ import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
@@ -50,6 +49,16 @@ public class KeyConfig {
     }
 
     private String loadKeyContent(String keyPath) throws IOException {
+        // Handle environment variable format: env:ENV_VAR_NAME
+        if (keyPath.startsWith("env:")) {
+            String envVarName = keyPath.substring("env:".length());
+            String content = System.getenv(envVarName);
+            if (content == null || content.isEmpty()) {
+                throw new IllegalStateException("Environment variable '" + envVarName + "' not found or empty");
+            }
+            return content;
+        }
+
         // Handle AWS Secrets Manager format: aws-secretsmanager://secret-name
         if (keyPath.startsWith("aws-secretsmanager://")) {
             return loadFromAwsSecretsManager(keyPath.substring("aws-secretsmanager://".length()));
@@ -67,13 +76,8 @@ public class KeyConfig {
 
     private String loadFromAwsSecretsManager(String secretName) {
         // TODO: Implement AWS Secrets Manager integration
-        // Example implementation:
-        // SecretsManagerClient client = SecretsManagerClient.builder().region(Region.US_EAST_1).build();
-        // GetSecretValueRequest request = GetSecretValueRequest.builder().secretId(secretName).build();
-        // GetSecretValueResponse response = client.getSecretValue(request);
-        // return response.secretString();
         throw new UnsupportedOperationException("AWS Secrets Manager integration not yet implemented. " +
-                "Use classpath or file system paths. For AWS integration, add aws-java-sdk-secretsmanager dependency.");
+                "Use env:, classpath:, or file system paths.");
     }
 
     private PrivateKey parsePrivateKey(String keyContent) throws Exception {

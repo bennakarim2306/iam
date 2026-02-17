@@ -1,5 +1,5 @@
 # dockerfile
-FROM maven:3.9.5-eclipse-temurin-17 AS build
+FROM maven:3.9.5-eclipse-temurin-21 AS build
 ARG APP_VERSION
 LABEL app.version=$APP_VERSION
 WORKDIR /workspace
@@ -8,7 +8,7 @@ RUN mvn -B dependency:go-offline
 COPY src ./src
 RUN mvn -B -DskipTests package
 
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM eclipse-temurin:21-jre-jammy AS runtime
 ARG JAR=/workspace/target/*.jar
 RUN addgroup --system app && adduser --system --ingroup app app
 COPY --from=build ${JAR} /app/app.jar
