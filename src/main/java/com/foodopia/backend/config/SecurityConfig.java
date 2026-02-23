@@ -26,7 +26,12 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz ->
                         authz
-                                .requestMatchers("/api/v1/auth/**", "/api/v1/account/**","/api/v1/items/**").permitAll()
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("GET", "/api/v1/items/**").permitAll() // Allow browsing items without authentication
+                                .requestMatchers("POST", "/api/v1/items/**").authenticated() // Require authentication for creating items
+                                .requestMatchers("PUT", "/api/v1/items/**").authenticated() // Require authentication for updating items
+                                .requestMatchers("DELETE", "/api/v1/items/**").authenticated() // Require authentication for deleting items
+                                .requestMatchers("/api/v1/account/**").authenticated() // Account operations require authentication
                                 .requestMatchers("/actuator/**", "/management/**").permitAll()
                                 .anyRequest().authenticated()
                 )

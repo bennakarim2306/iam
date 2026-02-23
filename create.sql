@@ -301,3 +301,5 @@ ALTER TABLE user_details."user-details"
         role varchar(255) check (role in ('USER','ADMIN')),
         primary key (id)
     );
+
+    ALTER TABLE business_data.items ALTER COLUMN imageurl TYPE TEXT

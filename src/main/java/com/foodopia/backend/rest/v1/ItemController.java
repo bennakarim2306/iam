@@ -1,6 +1,7 @@
 package com.foodopia.backend.rest.v1;
 
-import com.foodopia.backend.data.item.Item;
+import com.foodopia.backend.rest.v1.dto.ItemRequestDTO;
+import com.foodopia.backend.rest.v1.dto.ItemResponseDTO;
 import com.foodopia.backend.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -28,63 +29,76 @@ public class ItemController {
      * @return Liste aller Items
      */
     @GetMapping
-    public List<Item> getAllItems() {
+    public List<ItemResponseDTO> getAllItems() {
         return itemService.getAllItems();
     }
 
     /**
      * Legt ein neues Item mit Bild an.
      * POST /api/v1/items (multipart/form-data)
-     * @param item Das Item-Objekt
+     * @param authHeader Der Authorization Bearer Token zur Extraktion von Seller-Informationen
+     * @param itemJson Das Item-Objekt als JSON-String
      * @param imageFile Das Bild als MultipartFile
      * @return Das gespeicherte Item
      */
     @PostMapping(consumes = {"multipart/form-data"})
-    public Item addItemWithImage(
-            @RequestPart("item") Item item,
+    public ItemResponseDTO addItemWithImage(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestPart("item") ItemRequestDTO itemJson,
             @RequestPart("image") MultipartFile imageFile
     ) {
-        return itemService.addItemWithImage(item, imageFile);
+        return itemService.addItemWithImage(authHeader, itemJson, imageFile);
     }
 
     /**
      * Legt ein neues Item ohne Bild an.
      * POST /api/v1/items (application/json)
+     * @param authHeader Der Authorization Bearer Token zur Extraktion von Seller-Informationen
      * @param item Das Item-Objekt
      * @return Das gespeicherte Item
      */
     @PostMapping(consumes = {"application/json"})
-    public Item addItem(@RequestBody Item item) {
-        return itemService.addItem(item);
+    public ItemResponseDTO addItem(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody ItemRequestDTO item
+    ) {
+        return itemService.addItem(authHeader, item);
     }
 
     /**
      * Aktualisiert ein bestehendes Item inkl. Bild.
      * PUT /api/v1/items/{id} (multipart/form-data)
+     * @param authHeader Der Authorization Bearer Token
      * @param id Die Item-ID
      * @param item Das aktualisierte Item-Objekt
      * @param imageFile Das neue Bild
      * @return Das aktualisierte Item
      */
     @PutMapping(path = "/{id}", consumes = {"multipart/form-data"})
-    public Item updateItemWithImage(
+    public ItemResponseDTO updateItemWithImage(
+            @RequestHeader("Authorization") String authHeader,
             @PathVariable String id,
-            @RequestPart("item") Item item,
+            @RequestPart("item") ItemRequestDTO item,
             @RequestPart("image") MultipartFile imageFile
     ) {
-        return itemService.updateItemWithImage(id, item, imageFile);
+        return itemService.updateItemWithImage(authHeader, id, item, imageFile);
     }
 
     /**
      * Aktualisiert ein bestehendes Item ohne Bild.
      * PUT /api/v1/items/{id} (application/json)
+     * @param authHeader Der Authorization Bearer Token
      * @param id Die Item-ID
      * @param item Das aktualisierte Item-Objekt
      * @return Das aktualisierte Item
      */
     @PutMapping(path = "/{id}", consumes = {"application/json"})
-    public Item updateItem(@PathVariable String id, @RequestBody Item item) {
-        return itemService.updateItem(id, item);
+    public ItemResponseDTO updateItem(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable String id,
+            @RequestBody ItemRequestDTO item
+    ) {
+        return itemService.updateItem(authHeader, id, item);
     }
 
     /**
@@ -110,7 +124,7 @@ public class ItemController {
      * @return Gefilterte Liste von Items
      */
     @GetMapping("/filter")
-    public List<Item> getFilteredItems(
+    public List<ItemResponseDTO> getFilteredItems(
             @RequestParam Optional<String> name,
             @RequestParam Optional<String> type,
             @RequestParam Optional<Double> minPrice,
