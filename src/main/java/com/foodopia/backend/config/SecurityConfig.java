@@ -26,13 +26,30 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz ->
                         authz
+                                // Authentication endpoints - public
                                 .requestMatchers("/api/v1/auth/**").permitAll()
-                                .requestMatchers("GET", "/api/v1/items/**").permitAll() // Allow browsing items without authentication
-                                .requestMatchers("POST", "/api/v1/items/**").authenticated() // Require authentication for creating items
-                                .requestMatchers("PUT", "/api/v1/items/**").authenticated() // Require authentication for updating items
-                                .requestMatchers("DELETE", "/api/v1/items/**").authenticated() // Require authentication for deleting items
-                                .requestMatchers("/api/v1/account/**").authenticated() // Account operations require authentication
+
+                                // Items - GET allowed without auth, POST/PUT/DELETE require auth
+                                .requestMatchers("GET", "/api/v1/items/**").permitAll()
+                                .requestMatchers("POST", "/api/v1/items/**").authenticated()
+                                .requestMatchers("PUT", "/api/v1/items/**").authenticated()
+                                .requestMatchers("DELETE", "/api/v1/items/**").authenticated()
+
+                                // Transactions - ALL operations require authentication
+                                .requestMatchers("/api/v1/transactions/**").authenticated()
+
+                                // Account operations require authentication
+                                .requestMatchers("/api/v1/account/**").authenticated()
+
+                                // OpenAPI / Swagger documentation - public
+                                .requestMatchers("/v3/api-docs/**").permitAll()
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/swagger-ui.html").permitAll()
+
+                                // Actuator endpoints - public
                                 .requestMatchers("/actuator/**", "/management/**").permitAll()
+
+                                // Default: all other requests require authentication
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

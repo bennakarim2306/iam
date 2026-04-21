@@ -31,12 +31,14 @@ public class ItemService {
     private final ItemMapper itemMapper;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final ThumbnailService thumbnailService;
 
     public List<ItemResponseDTO> getAllItems() {
         logger.info("Fetching all items");
         List<Item> items = itemRepository.findAll();
         logger.info("Retrieved {} items", items.size());
         return items.stream()
+                .filter(item -> item.getQuantity() > 0)
                 .map(itemMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -66,6 +68,18 @@ public class ItemService {
 
             String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
             item.setImageUrl("data:" + imageFile.getContentType() + ";base64," + base64Image);
+
+            // Generiere Thumbnail
+            try {
+                String thumbnail = thumbnailService.generateThumbnail(base64Image, imageFile.getContentType());
+                item.setThumbnailUrl(thumbnail);
+                logger.debug("Thumbnail generated for item: name={}", itemDTO.getName());
+            } catch (IOException thumbnailException) {
+                logger.warn("Failed to generate thumbnail for item: name={}, using fallback",
+                        itemDTO.getName());
+                // Thumbnail-Fehler ist nicht kritisch, Item kann trotzdem gespeichert werden
+                item.setThumbnailUrl(null);
+            }
 
             Item saved = itemRepository.save(item);
             logger.info("Item added successfully: id={}, seller={}", saved.getId(), seller.getEmail());
@@ -132,6 +146,16 @@ public class ItemService {
             String base64Image = Base64.getEncoder().encodeToString(imageFile.getBytes());
             item.setImageUrl("data:" + imageFile.getContentType() + ";base64," + base64Image);
 
+            // Generiere Thumbnail
+            try {
+                String thumbnail = thumbnailService.generateThumbnail(base64Image, imageFile.getContentType());
+                item.setThumbnailUrl(thumbnail);
+                logger.debug("Thumbnail generated for item update: id={}", id);
+            } catch (IOException thumbnailException) {
+                logger.warn("Failed to generate thumbnail for item update: id={}, keeping old thumbnail", id);
+                // Bei Update behalten wir das alte Thumbnail falls Generierung fehlschlägt
+            }
+
             Item saved = itemRepository.save(item);
             logger.info("Item updated successfully: id={}", id);
             return itemMapper.toResponseDTO(saved);
@@ -191,6 +215,7 @@ public class ItemService {
 
         List<Item> items = itemRepository.findAll();
         List<Item> filtered = items.stream()
+                .filter(item -> item.getQuantity() > 0)
                 .filter(item -> name.map(n -> item.getName().toLowerCase().contains(n.toLowerCase())).orElse(true))
                 .filter(item -> type.map(t -> item.getType().equalsIgnoreCase(t)).orElse(true))
                 .filter(item -> minPrice.map(min -> item.getPrice() >= min).orElse(true))
@@ -207,6 +232,32 @@ public class ItemService {
 
         logger.info("Retrieved {} filtered items out of {} total items", filtered.size(), items.size());
         return filtered.stream()
+                .map(itemMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gibt alle Items des aktuellen Benutzers (Verkäufers) zurück.
+     * Extrahiert die E-Mail-Adresse aus dem Authorization Bearer Token und
+     * gibt alle Items zurück, bei denen seller.contact mit dieser E-Mail übereinstimmt.
+     * @param authHeader Der Authorization Bearer Token
+     * @return Liste der Items des aktuellen Benutzers
+     */
+    public List<ItemResponseDTO> getUserItems(String authHeader) {
+        logger.info("Fetching user items");
+
+        // Extrahiere E-Mail aus dem Authorization Bearer Token
+        String userEmail = extractUserEmailFromAuthHeader(authHeader);
+        logger.info("Fetching items for user: email={}", userEmail);
+
+        // Hole alle Items und filtere nach Seller E-Mail
+        List<Item> userItems = itemRepository.findAll().stream()
+                .filter(item -> item.getQuantity() > 0)
+                .filter(item -> item.getSeller() != null && userEmail.equals(item.getSeller().getContact()))
+                .collect(Collectors.toList());
+
+        logger.info("Retrieved {} items for user: email={}", userItems.size(), userEmail);
+        return userItems.stream()
                 .map(itemMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }

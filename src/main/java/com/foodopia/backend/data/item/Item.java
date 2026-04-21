@@ -52,5 +52,8 @@ public class Item {
     @Column(name = "imageurl")
     private String imageUrl;
 
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
+
     // Getters and Setters
 }

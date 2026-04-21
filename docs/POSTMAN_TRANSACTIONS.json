@@ -1,0 +1,555 @@
+{
+  "info": {
+    "name": "Foodopia Transactions API",
+    "description": "API Collection für Transactions (Orders/Bestellungen)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Create Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"item-123\",\n  \"quantityOrdered\": 2.5,\n  \"notes\": \"Bitte frisch verpacken\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions"]
+            },
+            "description": "Erstellt eine neue Bestellung (Transaktion)\nDer Kunde wird automatisch aus dem Bearer Token extrahiert"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/trans-001",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "trans-001"]
+            },
+            "description": "Ruft eine spezifische Bestellung anhand ihrer ID ab"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Orders (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/customer/my-orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "customer", "my-orders"]
+            },
+            "description": "Ruft alle Bestellungen des aktuellen Kunden ab\nDer Kunde wird aus dem Bearer Token extrahiert"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Orders (with Filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/customer/my-orders?status=PENDING&minPrice=5&maxPrice=50&minQuantity=1&maxQuantity=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "customer", "my-orders"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": false
+                },
+                {
+                  "key": "minDate",
+                  "value": "2025-01-01",
+                  "disabled": true
+                },
+                {
+                  "key": "maxDate",
+                  "value": "2025-12-31",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "5",
+                  "disabled": false
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "50",
+                  "disabled": false
+                },
+                {
+                  "key": "minQuantity",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "maxQuantity",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Ruft alle Bestellungen des aktuellen Kunden ab mit optionalen Filtern\nFilter Parameter (alle optional):\n- status: z.B. PENDING, CONFIRMED, COMPLETED, CANCELLED, REJECTED\n- minDate: Minimum Erstellungsdatum (yyyy-MM-dd)\n- maxDate: Maximum Erstellungsdatum (yyyy-MM-dd)\n- minPrice: Minimum Gesamtpreis\n- maxPrice: Maximum Gesamtpreis\n- minQuantity: Minimum bestellte Menge\n- maxQuantity: Maximum bestellte Menge"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Sales (with Filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/seller/my-sales?status=CONFIRMED&minPrice=10&maxPrice=100",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "seller", "my-sales"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "CONFIRMED",
+                  "disabled": false
+                },
+                {
+                  "key": "minDate",
+                  "value": "2025-01-01",
+                  "disabled": true
+                },
+                {
+                  "key": "maxDate",
+                  "value": "2025-12-31",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "10",
+                  "disabled": false
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "100",
+                  "disabled": false
+                },
+                {
+                  "key": "minQuantity",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxQuantity",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Ruft alle Verkäufe des aktuellen Verkäufers ab mit optionalen Filtern"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions Between Two Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/between?email=seller@example.com&status=CONFIRMED",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "between"],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "seller@example.com",
+                  "disabled": false
+                },
+                {
+                  "key": "status",
+                  "value": "CONFIRMED",
+                  "disabled": true
+                },
+                {
+                  "key": "minDate",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxDate",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minQuantity",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxQuantity",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Ruft alle Transaktionen zwischen dem aktuellen User und einem anderen User ab\nRequired Parameter:\n- email: Email des anderen Users\nOptionale Filter:\n- status, minDate, maxDate, minPrice, maxPrice, minQuantity, maxQuantity"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Orders for Item (with Filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/customer/item/{{item_id}}?status=PENDING&minQuantity=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "customer", "item", "{{item_id}}"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "disabled": true
+                },
+                {
+                  "key": "minDate",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxDate",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minQuantity",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "maxQuantity",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Ruft alle Bestellungen des aktuellen Kunden für ein bestimmtes Item ab mit optionalen Filtern"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Sales for Item (with Filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/seller/item/{{item_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "seller", "item", "{{item_id}}"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minDate",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxDate",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minQuantity",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxQuantity",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Ruft alle Verkäufe des aktuellen Verkäufers für ein bestimmtes Item ab mit optionalen Filtern"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Transaction Status (Seller Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/trans-001/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "trans-001", "status"]
+            },
+            "description": "Aktualisiert den Status einer Bestellung\nNur der Verkäufer darf diese Operation durchführen\n\nGültige Status-Übergänge:\n- PENDING → CONFIRMED (reduziert Item-Quantity)\n- PENDING → REJECTED\n- PENDING → CANCELLED\n- CONFIRMED → COMPLETED\n- CONFIRMED → CANCELLED (restituiert Item-Quantity)"
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Transaction (PENDING → CONFIRMED)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/trans-001/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "trans-001", "status"]
+            },
+            "description": "Bestätigt eine Bestellung (PENDING → CONFIRMED)\nBei dieser Überganz wird die Menge des Items reduziert"
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Transaction (PENDING → REJECTED)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REJECTED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/trans-001/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "trans-001", "status"]
+            },
+            "description": "Lehnt eine Bestellung ab (PENDING → REJECTED)\nKeine Quantity-Änderung da noch nicht CONFIRMED"
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Transaction (CONFIRMED → COMPLETED)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/trans-001/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "trans-001", "status"]
+            },
+            "description": "Markiert eine Bestellung als abgeschlossen (CONFIRMED → COMPLETED)\nKeine Quantity-Änderung, Endzustand"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Transaction (CONFIRMED → CANCELLED)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{seller_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/trans-001/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "trans-001", "status"]
+            },
+            "description": "Storniert eine bestätigte Bestellung (CONFIRMED → CANCELLED)\nBei dieser Überganz wird die Menge des Items zurückgebucht (Restitution)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaction (PENDING only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transactions/trans-001",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transactions", "trans-001"]
+            },
+            "description": "Löscht eine Bestellung\nKann nur durchgeführt werden wenn Status = PENDING\nBerechtigt: Kunde oder Verkäufer"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "bearer_token",
+      "value": "your_jwt_token_here",
+      "type": "string",
+      "description": "JWT Bearer Token für Authentifizierung"
+    },
+    {
+      "key": "customer_token",
+      "value": "customer_jwt_token_here",
+      "type": "string",
+      "description": "JWT Token eines Kunden"
+    },
+    {
+      "key": "seller_token",
+      "value": "seller_jwt_token_here",
+      "type": "string",
+      "description": "JWT Token eines Verkäufers"
+    },
+    {
+      "key": "transaction_id",
+      "value": "trans-001",
+      "type": "string",
+      "description": "Beispiel Transaktions-ID"
+    },
+    {
+      "key": "item_id",
+      "value": "item-123",
+      "type": "string",
+      "description": "Beispiel Item-ID"
+    }
+  ]
+}

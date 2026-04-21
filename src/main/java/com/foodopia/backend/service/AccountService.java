@@ -6,6 +6,8 @@ import com.foodopia.backend.exception.AddContactToListException;
 import com.foodopia.backend.rest.v1.dto.AccountInformationResponse;
 import com.foodopia.backend.rest.v1.dto.UserLight;
 import com.foodopia.backend.rest.v1.dto.AddressDto;
+import com.foodopia.backend.rest.v1.dto.AccountDetailsDTO;
+import com.foodopia.backend.rest.v1.dto.UpdateAccountDetailsDTO;
 import com.foodopia.backend.data.item.Address;
 import com.foodopia.backend.security.JwtService;
 import lombok.extern.slf4j.Slf4j;
@@ -129,7 +131,105 @@ public class AccountService {
         return mapToAddressDto(user.getAddress());
     }
 
-    // Private helper methods
+    /**
+     * Ruft die kompletten Account-Details des aktuellen Benutzers ab
+     *
+     * @param authHeader Authorization Bearer Token
+     * @return AccountDetailsDTO mit allen Benutzerinformationen
+     */
+    public AccountDetailsDTO getAccountDetails(String authHeader) {
+        String userEmail = extractUserEmail(authHeader);
+        User user = findUserByEmail(userEmail);
+        log.debug("Fetching account details for user: {}", userEmail);
+        return mapToAccountDetailsDTO(user);
+    }
+
+    /**
+     * Aktualisiert die Account-Details des aktuellen Benutzers (ohne Bild)
+     *
+     * @param authHeader Authorization Bearer Token
+     * @param updateDTO UpdateAccountDetailsDTO mit neuen Daten
+     * @return Aktualisierte AccountDetailsDTO
+     */
+    public AccountDetailsDTO updateAccountDetails(String authHeader, UpdateAccountDetailsDTO updateDTO) {
+        String userEmail = extractUserEmail(authHeader);
+        User user = findUserByEmail(userEmail);
+        log.info("Updating account details for user: {}", userEmail);
+
+        // Aktualisiere nur nicht-null Felder
+        if (updateDTO.getFirstName() != null && !updateDTO.getFirstName().isBlank()) {
+            user.setFirstName(updateDTO.getFirstName());
+        }
+        if (updateDTO.getLastName() != null && !updateDTO.getLastName().isBlank()) {
+            user.setLastName(updateDTO.getLastName());
+        }
+        if (updateDTO.getAge() != null && updateDTO.getAge() > 0) {
+            user.setAge(updateDTO.getAge());
+        }
+        if (updateDTO.getBirthDay() != null && !updateDTO.getBirthDay().isBlank()) {
+            try {
+                java.time.LocalDate parsedDate = java.time.LocalDate.parse(updateDTO.getBirthDay());
+                user.setBirthDay(java.sql.Date.valueOf(parsedDate));
+            } catch (Exception e) {
+                log.warn("Invalid birth date format for user: {}", userEmail);
+            }
+        }
+        if (updateDTO.getAddress() != null) {
+            user.setAddress(mapToAddress(updateDTO.getAddress()));
+        }
+        if (updateDTO.getAvailabilityDays() != null && !updateDTO.getAvailabilityDays().isBlank()) {
+            user.setAvailabilityDays(updateDTO.getAvailabilityDays());
+        }
+        if (updateDTO.getAvailabilityTimes() != null && !updateDTO.getAvailabilityTimes().isBlank()) {
+            user.setAvailabilityTimes(updateDTO.getAvailabilityTimes());
+        }
+        if (updateDTO.getNeedConfirmation() != null) {
+            user.setNeedConfirmation(updateDTO.getNeedConfirmation());
+        }
+
+        User updatedUser = userRepository.save(user);
+        log.info("Account details updated successfully for user: {}", userEmail);
+        return mapToAccountDetailsDTO(updatedUser);
+    }
+
+    /**
+     * Aktualisiert das Profilbild des aktuellen Benutzers
+     *
+     * @param authHeader Authorization Bearer Token
+     * @param base64Image Base64-kodiertes Bild
+     * @param contentType Content-Type des Bildes (z.B. "image/jpeg")
+     * @return Aktualisierte AccountDetailsDTO
+     */
+    public AccountDetailsDTO updateAccountImage(String authHeader, String base64Image, String contentType) {
+        String userEmail = extractUserEmail(authHeader);
+        User user = findUserByEmail(userEmail);
+        log.info("Updating profile picture for user: {}", userEmail);
+
+        // Speichere Bild im Format "data:image/jpeg;base64,..."
+        String profilePicture = "data:" + contentType + ";base64," + base64Image;
+        user.setProfilePicture(profilePicture);
+
+        User updatedUser = userRepository.save(user);
+        log.info("Profile picture updated successfully for user: {}", userEmail);
+        return mapToAccountDetailsDTO(updatedUser);
+    }
+
+    /**
+     * Löscht das Konto des aktuellen Benutzers
+     * WARNUNG: Diese Operation ist irreversibel!
+     *
+     * @param authHeader Authorization Bearer Token
+     */
+    public void deleteAccount(String authHeader) {
+        String userEmail = extractUserEmail(authHeader);
+        User user = findUserByEmail(userEmail);
+        log.warn("Deleting account for user: {}", userEmail);
+
+        userRepository.delete(user);
+        log.warn("Account deleted successfully for user: {}", userEmail);
+    }
+
+    // ...existing code...
 
     private String extractUserEmail(String authHeader) {
         return jwtService.extractUserEmail(authHeader.substring(7));
@@ -196,5 +296,33 @@ public class AccountService {
         dto.setLat(address.getLat());
         dto.setLng(address.getLng());
         return dto;
+    }
+
+    private AccountDetailsDTO mapToAccountDetailsDTO(User user) {
+        if (user == null) return null;
+
+        // Konvertiere java.sql.Date zu java.time.LocalDate
+        java.time.LocalDate birthDay = null;
+        if (user.getBirthDay() != null) {
+            birthDay = user.getBirthDay().toLocalDate();
+        }
+
+        return AccountDetailsDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .age(user.getAge())
+                .birthDay(birthDay)
+                .role(user.getRole() != null ? user.getRole().name() : null)
+                .address(mapToAddressDto(user.getAddress()))
+                .profilePicture(user.getProfilePicture())
+                .availabilityDays(user.getAvailabilityDays())
+                .availabilityTimes(user.getAvailabilityTimes())
+                .needConfirmation(user.getNeedConfirmation())
+                .profileComplete(user.getProfileComplete())
+                .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
+                .updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null)
+                .build();
     }
 }

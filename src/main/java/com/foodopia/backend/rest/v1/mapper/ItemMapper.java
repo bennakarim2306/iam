@@ -5,6 +5,7 @@ import com.foodopia.backend.data.item.Item;
 import com.foodopia.backend.data.item.Seller;
 import com.foodopia.backend.rest.v1.dto.ItemRequestDTO;
 import com.foodopia.backend.rest.v1.dto.ItemResponseDTO;
+import com.foodopia.backend.rest.v1.dto.ItemSummaryDTO;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -177,5 +178,23 @@ public class ItemMapper {
             return null;
         }
         return date.format(DATE_FORMATTER);
+    }
+
+    /**
+     * Konvertiert eine Item-Entity in ein ItemSummaryDTO (für Transaktionen).
+     * Enthält nur die wichtigsten Metadaten und Thumbnail.
+     */
+    public ItemSummaryDTO toSummaryDTO(Item item) {
+        if (item == null) {
+            return null;
+        }
+
+        return ItemSummaryDTO.builder()
+                .name(item.getName())
+                .type(item.getType())
+                .price(item.getPrice())
+                .unit(item.getUnit())
+                .thumbnailUrl(item.getThumbnailUrl())
+                .build();
     }
 }

@@ -1,0 +1,170 @@
+{
+  "info": {
+    "name": "Foodopia Account APIs",
+    "description": "Collection for testing Account Management APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Account Details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/account/details",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "account", "details"]
+        },
+        "description": "Fetch complete account details for the current user"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Account Details",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"age\": 30,\n  \"birthDay\": \"1995-05-15\",\n  \"address\": {\n    \"street\": \"Main Street 123\",\n    \"city\": \"Berlin\",\n    \"zip\": \"10115\",\n    \"lat\": 52.5200,\n    \"lng\": 13.4050\n  },\n  \"availabilityDays\": \"MON,TUE,WED,THU,FRI\",\n  \"availabilityTimes\": \"09:00-17:00\",\n  \"needConfirmation\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/account/details",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "account", "details"]
+        },
+        "description": "Update account details (excluding profile picture)"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Profile Image",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/image.jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/account/image",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "account", "image"]
+        },
+        "description": "Update profile picture for the current user"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Address",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/account/getAddressByEmail",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "account", "getAddressByEmail"]
+        },
+        "description": "Get address for the current user"
+      },
+      "response": []
+    },
+    {
+      "name": "Set Address",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"street\": \"New Street 456\",\n  \"city\": \"Munich\",\n  \"zip\": \"80331\",\n  \"lat\": 48.1351,\n  \"lng\": 11.5820\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/account/setAddressByEmail",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "account", "setAddressByEmail"]
+        },
+        "description": "Set address for the current user"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Account",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/account",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "account"]
+        },
+        "description": "Delete the current user account (WARNING: IRREVERSIBLE!)"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "<your_jwt_token_here>",
+      "type": "string"
+    }
+  ]
+}
+

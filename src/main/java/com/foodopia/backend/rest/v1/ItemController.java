@@ -112,6 +112,21 @@ public class ItemController {
     }
 
     /**
+     * Gibt alle Items des aktuellen Benutzers zurück.
+     * Extrahiert die E-Mail-Adresse aus dem Authorization Bearer Token und
+     * gibt alle Items zurück, bei denen seller.contact mit dieser E-Mail übereinstimmt.
+     * GET /api/v1/items/user/my-items
+     * @param authHeader Der Authorization Bearer Token
+     * @return Liste der Items des aktuellen Benutzers
+     */
+    @GetMapping("/user/my-items")
+    public List<ItemResponseDTO> getUserItems(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        return itemService.getUserItems(authHeader);
+    }
+
+    /**
      * Gibt gefilterte Items zurück, z.B. nach Name, Typ, Preis, Geoposition und Distanz.
      * GET /api/v1/items/filter
      * @param name Optionaler Name-Filter

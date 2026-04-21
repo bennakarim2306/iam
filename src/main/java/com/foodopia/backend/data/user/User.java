@@ -65,6 +65,61 @@ public class User implements UserDetails {
     })
     private Address address;
 
+    /**
+     * Profilbild (Base64 kodiert)
+     */
+    @Column(name = "profile_picture")
+    private String profilePicture;
+
+    /**
+     * Verfügbarkeitstage (komma-separiert oder pipe-separiert)
+     * Beispiel: "MON,TUE,WED,THU,FRI"
+     */
+    @Column(name = "availability_days")
+    private String availabilityDays;
+
+    /**
+     * Verfügbarkeitszeiten (mehrere Zeitspannen, pipe-separiert)
+     * Beispiel: "09:00-17:00" oder "09:00-12:00|14:00-18:00"
+     */
+    @Column(name = "availability_times")
+    private String availabilityTimes;
+
+    /**
+     * Bestätigung erforderlich für Buchungen
+     */
+    @Column(name = "need_confirmation")
+    private Boolean needConfirmation;
+
+    /**
+     * Profilstatus (vollständig/unvollständig)
+     */
+    @Column(name = "profile_complete")
+    private Boolean profileComplete;
+
+    /**
+     * Zeitstempel der Erstellung
+     */
+    @Column(name = "created_at", updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    /**
+     * Zeitstempel der letzten Aktualisierung
+     */
+    @Column(name = "updated_at")
+    private java.time.LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.LocalDateTime.now();
+        updatedAt = java.time.LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = java.time.LocalDateTime.now();
+    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

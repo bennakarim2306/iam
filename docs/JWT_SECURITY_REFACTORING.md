@@ -24,13 +24,13 @@ private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F44
 
 ## Files Modified
 
-1. **[JwtService.java](src/main/java/com/foodopia/backend/security/JwtService.java)**
+1. **[JwtService.java](../src/main/java/com/foodopia/backend/security/JwtService.java)**
    - Removed hard-coded secret key
    - Injected PrivateKey and PublicKey as dependencies
    - Changed from HS256 to RS256 algorithm
    - Made token expiration configurable
 
-2. **[KeyConfig.java](src/main/java/com/foodopia/backend/config/KeyConfig.java)** (New)
+2. **[KeyConfig.java](../src/main/java/com/foodopia/backend/config/KeyConfig.java)** (New)
    - Spring Configuration class for loading RSA keys
    - Supports multiple loading strategies:
      - Classpath resources (local development)
@@ -38,7 +38,7 @@ private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F44
      - AWS Secrets Manager (production)
    - PEM format parsing with automatic header/whitespace handling
 
-3. **[application.properties](src/main/resources/application.properties)**
+3. **[application.properties](../src/main/resources/application.properties)**
    - Added JWT configuration properties:
      ```properties
      jwt.private-key=classpath:certs/private-key.pem
