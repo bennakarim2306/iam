@@ -565,3 +565,68 @@ ALTER TABLE user_details."user-details" ADD COLUMN IF NOT EXISTS updated_at VARC
         role varchar(255) check (role in ('USER','ADMIN')),
         primary key (id)
     );
+
+    create table business_data.items (
+        address_lat float(53),
+        address_lng float(53),
+        availablefrom date,
+        availableto date,
+        price float(53) not null,
+        quantity float(53) not null,
+        address_city varchar(255),
+        address_street varchar(255),
+        address_zip varchar(255),
+        description varchar(255),
+        id varchar(255) not null,
+        imageurl varchar(255),
+        name varchar(255),
+        seller_contact varchar(255),
+        seller_id varchar(255),
+        seller_name varchar(255),
+        thumbnail_url varchar(255),
+        type varchar(255),
+        unit varchar(255),
+        primary key (id)
+    );
+
+    create table business_data.transactions (
+        price_per_unit float(53) not null,
+        quantity_ordered float(53) not null,
+        total_price float(53) not null,
+        created_at timestamp(6) not null,
+        updated_at timestamp(6) not null,
+        customer_email varchar(255) not null,
+        id varchar(255) not null,
+        item_id varchar(255) not null,
+        notes TEXT,
+        seller_email varchar(255) not null,
+        status varchar(255) not null check (status in ('PENDING','CONFIRMED','COMPLETED','CANCELLED','REJECTED')),
+        primary key (id)
+    );
+
+    create table user_details."user-details" (
+        address_lat float(53),
+        address_lng float(53),
+        age integer,
+        birth_day date,
+        consent_allowed boolean not null,
+        need_confirmation boolean,
+        profile_complete boolean,
+        created_at timestamp(6),
+        updated_at timestamp(6),
+        address_city varchar(255),
+        address_street varchar(255),
+        address_zip varchar(255),
+        availability_days varchar(255),
+        availability_times varchar(255),
+        contacts_list varchar(255),
+        contacts_request_list varchar(255),
+        email varchar(255),
+        first_name varchar(255),
+        id varchar(255) not null,
+        last_name varchar(255),
+        password varchar(255),
+        profile_picture varchar(255),
+        role varchar(255) check (role in ('USER','ADMIN')),
+        primary key (id)
+    );
